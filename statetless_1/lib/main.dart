@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:statetless_1/paginaInicial.dart';
 
 //função principal que inicia o aplicativo
 void main(){
-  runApp(Aplicativo());
+  runApp(home());
 }
+
+class home extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
+      home: Aplicativo(),
+    );
+  }
+}
+
 //criando minha classe própria
 //stateless é estático, não muda, carrega só uma vez
 class Aplicativo extends StatelessWidget{
@@ -15,14 +28,10 @@ class Aplicativo extends StatelessWidget{
   //MaterialApp é o que personaliza o tema
   @override
   Widget build(BuildContext context){
-    return MaterialApp(
-      theme: ThemeData.dark(),
-      debugShowCheckedModeBanner: false,
-      //home é a primeira tela que carrega
-      home: Scaffold(
+    return Scaffold(
         //appbar é barra superior
         appBar: AppBar(
-          leading: Icon(Icons.apple, size: 50),
+        
           title: Text('Flutter é divertido!'),
           backgroundColor: Colors.deepPurpleAccent,
         ),
@@ -85,7 +94,40 @@ class Aplicativo extends StatelessWidget{
         BottomNavigationBarItem(icon: Icon(Icons.search), label: "Buscar"),
       ]),
 
+    drawer: Drawer(
+      backgroundColor: Colors.deepPurpleAccent,
+      child: ListView(
+        padding: EdgeInsets.zero, //zerar padding
+        children: [
+          DrawerHeader(
+            child: Text('Texto de Cabeçalho')
+          ),
+          ListTile(
+            leading: Icon(Icons.account_circle),
+            title: Text("Perfil"),
+            onTap: () { print("entrou no perfil"); },
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text("Página Inicial"),
+            onTap:() { 
+              //fechar menu lateral
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PaginaInicial()));
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text("Configurações"),
+            onTap: (){ },
+          ),
+            
+        ],
       ),
+    ),
+      
+
+    
     );
   }
 }
