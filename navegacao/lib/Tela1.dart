@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+
 
 //criando a classe pessoa - que vai fabricar pessoas
 class Pessoa {
@@ -26,6 +32,18 @@ class _CadastroState extends State<Cadastro>{
   final telefoneControle = TextEditingController();
   final enderecoControle = TextEditingController();
   final cidadeControle = TextEditingController();
+
+  //criando método de CADASTRO - método API de POST
+  Future<void> cadastrarPessoa(Pessoa pessoa) async {
+    final url = Uri.parse("https://senac2025-1a776-default-rtdb.firebaseio.com/pessoa.json");
+    final resposta = await http.post( url, body: jsonEncode({ 
+      "nome": pessoa.nome,
+      "email": pessoa.email,
+      "telefone": pessoa.telefone,
+      "endereco" : pessoa.endereco,
+      "cidade" : pessoa.cidade
+     }));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +77,9 @@ class _CadastroState extends State<Cadastro>{
                   cidadeControle.text,
               );
                 //adicionando pessoa na lista "Ex: Seu Arlindo"
-                widget.pessoas.add(pessoaNova);
-                print( widget.pessoas.length);
+                //widget.pessoas.add(pessoaNova);
+                cadastrarPessoa(pessoaNova);
+                
                 //limpar os campos
                 nomeControle.clear();
                 emailControle.clear();
@@ -74,6 +93,7 @@ class _CadastroState extends State<Cadastro>{
               backgroundColor: Colors.green,
               foregroundColor: Colors.white
             ),
+            
           ),
         ],
       ),
