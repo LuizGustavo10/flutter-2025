@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:navegacao/Tela1.dart';
+import 'package:navegacao/Detalhes.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,7 +12,7 @@ class TabelaPai extends StatefulWidget{
 }
 
 class Tabela extends State<TabelaPai> {
-
+  //método que roda quando abre a tela
   @override
   void initState(){
     super.initState();
@@ -21,16 +22,44 @@ class Tabela extends State<TabelaPai> {
   final List<Pessoa> pessoas = [];
   //Tabela({required this.pessoas});
 
+  //construindo método de exclusão
+  Future<void> excluir(String id) async {
+    final url = Uri.parse(
+      "https://senac2025-1a776-default-rtdb.firebaseio.com/pessoa/$id.json");
+    final resposta = await http.delete(url);
+    if(resposta.statusCode == 200){
+      setState(() {
+        pessoas.clear();
+        buscarPessoas();
+      });
+    }
+  }
+
   //método para buscar todos os clientes do banco
   Future<void> buscarPessoas() async {
     final url = Uri.parse("https://senac2025-1a776-default-rtdb.firebaseio.com/pessoa.json");
     final resposta = await http.get(url);
     //decodificando o arquivo json que recebemos
     final Map<String, dynamic> ? dados = jsonDecode(resposta.body);
-    print(dados);
-  
+    //se os dados da lista não forem nulos
+    if(dados != null){
+      //foreach é o loop de repetição que lista um a um
+      dados.forEach((id, dadosPessoa){
+        //aqui vai atualizar a lista e adicionar uma pessoa por vês
+        setState(() { 
+            Pessoa pessoaNova = Pessoa(
+               id,
+               dadosPessoa["nome"] ?? '',
+               dadosPessoa["email"] ?? '',
+               dadosPessoa["telefone"] ?? '',
+               dadosPessoa["endereco"] ?? '',
+               dadosPessoa["cidade"] ?? ''
+               );
+               pessoas.add(pessoaNova);
+          });
+      });
+    }
   }
-
 
   Future<void> abrirWhats(String telefone) async {
   final url = Uri.parse('https://wa.me/$telefone');
@@ -58,25 +87,33 @@ class Tabela extends State<TabelaPai> {
               leading: Icon(Icons.person),
               title: Text(pessoas[index].nome),
               subtitle: Text(
-              "Tel: " + pessoas[index].telefone + 
-              "\n Email: " + pessoas[index].email +
-              "\n Endereço: " + pessoas[index].endereco +
-              "\n cidade: " + pessoas[index].cidade
+              "Email: " + pessoas[index].email
               ),
-              trailing: IconButton(
-                onPressed: () => abrirWhats(pessoas[index].telefone),
-                icon: Icon(Icons.message)
-              
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                  onPressed: () => abrirWhats(pessoas[index].telefone),
+                  icon: Icon(Icons.message, color:Colors.green,)
+                  ),
+
+                  IconButton(
+                  onPressed: () => excluir(pessoas[index].id),
+                  icon: Icon(Icons.delete_rounded, color:Colors.red,)
+                  ),
+
+                ],
               ),
-              
+              //quando clicar no item da lista (onTap)
+              onTap: () {
+                Navigator.push(context , 
+                MaterialPageRoute(builder: (context) => Detalhes(pessoa:pessoas[index])));
+              },
+  
             );
           }
         ),
       ),
     );
   }
-
-  
-  
-
 }
