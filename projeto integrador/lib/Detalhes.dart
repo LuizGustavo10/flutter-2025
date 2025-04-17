@@ -3,9 +3,9 @@ import 'package:navegacao/Tela1.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Detalhes extends StatelessWidget {
-  final Pessoa pessoa;
-  //passando parâmetro da pessoa especifica
-  Detalhes({required this.pessoa});
+  final Empresa empresa;
+  //passando parâmetro da empresa especifica
+  Detalhes({required this.empresa});
   
 ligar(String telefone) async {
   final Uri telefoneUrl = Uri(scheme: "tel", path: telefone);
@@ -45,22 +45,25 @@ abrirWhats(String telefone) async {
             children: [
               Icon(Icons.person, size: 100, color: Colors.blue,),
               SizedBox(height: 20,),
-              Text(pessoa.nome, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+              Text(empresa.nome, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
               SizedBox(height: 10,),
-              Text("Nome: ${pessoa.nome}", style: TextStyle(fontSize: 18)),
-              Text("Email: ${pessoa.email}", style: TextStyle(fontSize: 18)),
-              Text("Telefone: ${pessoa.telefone}", style: TextStyle(fontSize: 18)),
-              Text("Endereço: ${pessoa.endereco}", style: TextStyle(fontSize: 18)),
-              Text("Cidade: ${pessoa.cidade}", style: TextStyle(fontSize: 18)),
+              Text("Nome: ${empresa.nome}", style: TextStyle(fontSize: 18)),
+              Text("Email: ${empresa.email}", style: TextStyle(fontSize: 18)),
+              Text("Cnpj: ${empresa.cnpj}", style: TextStyle(fontSize: 18)),
+              Text("Telefone: ${empresa.telefone}", style: TextStyle(fontSize: 18)),
+              Text("Endereço: ${empresa.endereco}", style: TextStyle(fontSize: 18)),
+              Text("Cidade: ${empresa.cidade}", style: TextStyle(fontSize: 18)),
+              Text("Qtd Funcionários: ${empresa.qtdFuncionarios}", style: TextStyle(fontSize: 18)),
+              Text("Vaga: ${empresa.vaga}", style: TextStyle(fontSize: 18)),
               SizedBox(height: 200), 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton.icon(onPressed: () => ligar(pessoa.telefone), icon: Icon(Icons.phone), label: Text("Ligar")),
+                  ElevatedButton.icon(onPressed: () => ligar(empresa.telefone), icon: Icon(Icons.phone), label: Text("Ligar")),
                   SizedBox(width: 10),
-                  ElevatedButton.icon(onPressed: () => enviarEmail(pessoa.email), icon: Icon(Icons.email), label: Text("E-mail")),
+                  ElevatedButton.icon(onPressed: () => enviarEmail(empresa.email), icon: Icon(Icons.email), label: Text("E-mail")),
                   SizedBox(width: 10),
-                  ElevatedButton.icon(onPressed: () => abrirWhats(pessoa.telefone), icon: Icon(Icons.phone_iphone), label: Text("Whatsapp")),
+                  ElevatedButton.icon(onPressed: () => abrirWhats(empresa.telefone), icon: Icon(Icons.phone_iphone), label: Text("Whatsapp")),
                   SizedBox(width: 10),
                 ],
               ),
