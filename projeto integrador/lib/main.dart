@@ -51,8 +51,8 @@ class Menu extends StatelessWidget {
             botao(texto: 'Criar Postagem', rota:'/tela3', icone: Icons.post_add, cor: Colors.white),
             botao(texto: 'Ver Postagens', rota:'/tela4', icone: Icons.list_rounded, cor: Colors.white),
             botao(texto: 'Minhas Postagens', rota:'/tela5', icone: Icons.person_search_rounded, cor: Colors.white),
-            botao(texto: 'Cadastrar Treino', rota:'/tela6', icone: Icons.person_search_rounded, cor: Colors.white),
-            botao(texto: 'Ver Treinos', rota:'/tela7', icone: Icons.person_search_rounded, cor: Colors.white),
+            botao(texto: 'Cadastrar Treino', rota:'/tela6', icone: Icons.directions_run, cor: Colors.white),
+            botao(texto: 'Ver Treinos', rota:'/tela7', icone: Icons.content_paste_search_rounded, cor: Colors.white),
 
           ],
         ),

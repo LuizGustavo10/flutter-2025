@@ -93,12 +93,6 @@ class LoginEstado extends State<Login>{
 
 
 
-
-
-
-
-
-
    
       CarouselSlider(
         options: CarouselOptions(height: 200.0, autoPlay: true),

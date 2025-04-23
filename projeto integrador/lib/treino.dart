@@ -136,13 +136,15 @@ class _VerExerciciosState extends State<VerExercicios> {
     final url = Uri.parse(
         'https://senac2025-1a776-default-rtdb.firebaseio.com/exercicios/${widget.username}.json');
     final resposta = await http.get(url);
+
     if (resposta.statusCode == 200) {
       final Map<String, dynamic>? dados =
           jsonDecode(resposta.body) as Map<String, dynamic>?;
       if (dados != null) {
         final List<Map<String, dynamic>> exercicios = [];
         dados.forEach((key, valor) {
-          if (widget.tipoExercicioFiltro == null || valor['tipo'] == widget.tipoExercicioFiltro) {
+          if (widget.tipoExercicioFiltro == null ||
+              valor['tipo'] == widget.tipoExercicioFiltro) {
             exercicios.add({
               'id': key,
               'nome': valor['nome'],
@@ -154,13 +156,10 @@ class _VerExerciciosState extends State<VerExercicios> {
             });
           }
         });
-        return exercicios.toList();
-      } else {
-        return [];
+        return exercicios;
       }
-    } else {
-      throw Exception('Falha ao carregar os exercícios');
     }
+    throw Exception('Falha ao carregar os exercícios');
   }
 
   Future<void> deletarExercicio(String exercicioId) async {
@@ -171,12 +170,120 @@ class _VerExerciciosState extends State<VerExercicios> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Exercício deletado com sucesso!')),
       );
-      setState(() {}); // Atualiza a tela
+      setState(() {});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao deletar exercício.')),
       );
     }
+  }
+
+  Widget buildFiltroInicial() {
+    return Column(
+      children: [
+        SizedBox(height: 24),
+        Text("Escolha o tipo de exercício", style: TextStyle(fontSize: 20)),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            filtroCard('Braço', Icons.fitness_center),
+            filtroCard('Peito', Icons.bolt),
+            filtroCard('Perna', Icons.directions_run),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget filtroCard(String tipo, IconData icone) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerExercicios(
+              username: widget.username,
+              tipoExercicioFiltro: tipo,
+            ),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 4,
+        color: Colors.orange.shade100,
+        child: Container(
+          width: 100,
+          height: 100,
+          padding: EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icone, size: 36, color: Colors.orange),
+              SizedBox(height: 8),
+              Text(tipo, style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildListaExercicios() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: buscarExercicios(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Erro ao carregar exercícios!"));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+              child: Text("Nenhum exercício encontrado para este tipo."));
+        }
+
+        final exercicios = snapshot.data!;
+        return ListView.builder(
+          itemCount: exercicios.length,
+          itemBuilder: (context, index) {
+            final exercicio = exercicios[index];
+            return Card(
+              elevation: 3,
+              margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(exercicio['nome'],
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text('Tipo: ${exercicio['tipo']}'),
+                    Text('Séries: ${exercicio['series']}'),
+                    Text('Repetições: ${exercicio['repeticoes']}'),
+                    SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            deletarExercicio(exercicio['id']);
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -185,142 +292,13 @@ class _VerExerciciosState extends State<VerExercicios> {
       appBar: AppBar(
         title: Text(widget.tipoExercicioFiltro != null
             ? 'Exercícios de ${widget.tipoExercicioFiltro}'
-            : 'Todos os Exercícios'),
+            : 'Filtrar Exercícios'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: buscarExercicios(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text("Erro ao carregar exercícios!"));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("Nenhum exercício cadastrado para este tipo."));
-          }
-          final exercicios = snapshot.data!;
-          return ListView.builder(
-            itemCount: exercicios.length,
-            itemBuilder: (context, index) {
-              final exercicio = exercicios[index];
-              return Card(
-                elevation: 3,
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        exercicio['nome'],
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Tipo: ${exercicio['tipo']}'),
-                      SizedBox(height: 8),
-                      Text('Séries: ${exercicio['series']}'),
-                      SizedBox(height: 8),
-                      Text('Repetições: ${exercicio['repeticoes']}'),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              deletarExercicio(exercicio['id']);
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class MenuExercicios extends StatelessWidget {
-  final String username;
-  MenuExercicios({required this.username});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Menu de Exercícios'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-      ),
-      body: ListView(
-        children: <Widget>[
-          ListTile(
-            title: Text('Cadastrar Exercício'),
-            leading: Icon(Icons.add, color: Colors.orange),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CadastrarExercicio(username: username)),
-              );
-            },
-          ),
-          Divider(),
-          ListTile(
-            title: Text('Ver Todos os Exercícios'),
-            leading: Icon(Icons.fitness_center, color: Colors.orange),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => VerExercicios(username: username)),
-              );
-            },
-          ),
-          Divider(),
-          ListTile(
-            title: Text('Exercícios de Peito'),
-            leading: Icon(Icons.bolt, color: Colors.orange), // Ícone de peito (pode precisar de um pacote de ícones personalizado)
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => VerExercicios(username: username, tipoExercicioFiltro: 'Peito')),
-              );
-            },
-          ),
-          Divider(),
-          ListTile(
-            title: Text('Exercícios de Braço'),
-            leading: Icon(Icons.boy_rounded, color: Colors.orange),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => VerExercicios(username: username, tipoExercicioFiltro: 'Braço')),
-              );
-            },
-          ),
-          Divider(),
-          ListTile(
-            title: Text('Exercícios de Perna'),
-            leading: Icon(Icons.directions_run, color: Colors.orange),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => VerExercicios(username: username, tipoExercicioFiltro: 'Perna')),
-              );
-            },
-          ),
-        ],
-      ),
+      body: widget.tipoExercicioFiltro == null
+          ? buildFiltroInicial()
+          : buildListaExercicios(),
     );
   }
 }
